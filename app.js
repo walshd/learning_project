@@ -142,30 +142,76 @@ function stripHtml(html) {
 function renderItems(container, items, type) {
     container.innerHTML = ''; // Clear loading state
     
+    // Load saved jobs from local storage
+    const savedJobs = new Set(JSON.parse(localStorage.getItem('savedJobs')) || []);
+
     items.forEach(item => {
         // Create <li> for semantic list
         const li = document.createElement('li');
         li.className = `${type}-item-wrapper`;
         
         let metaHtml = '';
+        let actionHtml = '';
+
         if (type === 'news') {
             metaHtml = `<span>${item.source}</span><span>•</span><span>${item.time}</span>`;
         } else {
+            // Job Specific Logic
             metaHtml = `<span>${item.company}</span><span>•</span><span>${item.location}</span>`;
+            
+            // Check if saved
+            const isSaved = savedJobs.has(item.url);
+            const btnClass = isSaved ? 'save-btn saved' : 'save-btn';
+            const btnLabel = isSaved ? 'Unsave Job' : 'Save Job';
+            
+            // Add Save Button
+            actionHtml = `
+                <button class="${btnClass}" aria-label="${btnLabel}" data-url="${item.url}">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                </button>
+            `;
         }
 
         // Wrap in anchor tag for clickability
-        // Added description paragraph
         li.innerHTML = `
-            <a href="${item.url}" target="_blank" class="card-link" aria-label="Read more about ${item.title}">
-                <article>
+            <article class="card-content">
+                ${actionHtml}
+                <a href="${item.url}" target="_blank" class="card-link" aria-label="Read more about ${item.title}">
                     <strong class="item-title">${item.title}</strong>
                     <div class="item-meta">${metaHtml}</div>
                     <p class="item-description">${item.description}</p>
-                </article>
-            </a>
+                </a>
+            </article>
         `;
         
         container.appendChild(li);
+
+        // Attach event listener for Save button if it exists
+        if (type === 'job') {
+            const btn = li.querySelector('.save-btn');
+            btn.addEventListener('click', (e) => {
+                e.preventDefault(); // Prevent link navigation
+                e.stopPropagation(); // Stop bubbling
+                toggleSave(item.url, btn);
+            });
+        }
     });
+}
+
+function toggleSave(url, btn) {
+    const savedJobs = new Set(JSON.parse(localStorage.getItem('savedJobs')) || []);
+    
+    if (savedJobs.has(url)) {
+        savedJobs.delete(url);
+        btn.classList.remove('saved');
+        btn.setAttribute('aria-label', 'Save Job');
+    } else {
+        savedJobs.add(url);
+        btn.classList.add('saved');
+        btn.setAttribute('aria-label', 'Unsave Job');
+    }
+    
+    localStorage.setItem('savedJobs', JSON.stringify([...savedJobs]));
 }

@@ -314,3 +314,43 @@ li.news-item-wrapper:hover, li.job-item-wrapper:hover {
     text-overflow: ellipsis;
 }
 
+
+/* Save Job Button */
+.card-content {
+    position: relative;
+    /* Ensure the button is clickable */
+    z-index: 2; 
+}
+
+.save-btn {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 8px; /* Touch target */
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    z-index: 10; /* Above the link */
+}
+
+.save-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-main);
+    transform: scale(1.1);
+}
+
+.save-btn svg {
+    display: block;
+}
+
+.save-btn.saved {
+    color: var(--accent-primary);
+    filter: drop-shadow(0 0 8px var(--accent-glow));
+}
+
+.save-btn.saved svg {
+    fill: var(--accent-primary);
+}

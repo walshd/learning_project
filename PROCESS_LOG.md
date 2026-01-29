@@ -157,3 +157,16 @@ This document records the step-by-step process of creating and setting up this p
 - **Action**: Modified `styles.css` to include specific Skeleton Loading animations (shimmer effect).
 - **Action**: Updated `index.html` to use the static skeleton markup instead of a simple spinner, ensuring immediate visual feedback.
 - **Verification**: Browser subagent captured the transition from Skeleton state to Loaded state. The app now feels faster and more polished.
+
+## Step 23: Version Control Checkpoint
+- **Date**: 2026-01-29
+- **Action**: Committed and pushed UI Skeleton changes.
+- **Commit Message**: `feat: implement skeleton loading screens for better UX`
+- **Status**: Visual polish phase backed up.
+
+## Step 24: Save Job Feature
+- **Date**: 2026-01-29
+- **Action**: Implemented `localStorage` based job saving.
+- **Action**: Added Bookmark/Save icon to Job Cards in `app.js`.
+- **Action**: Added CSS for the save button including hover states and active "filled" state.
+- **Verification**: Verified that clicking the button toggles the state and that the state persists after page reload.
