@@ -123,3 +123,22 @@ This document records the step-by-step process of creating and setting up this p
   - **Priority**: Jobs with "Manchester" or "Liverpool" in the location are bumped to the top of the list.
   - **Secondary**: All other locations follow.
 - **Outcome**: The dashboard now intelligently organizes data, giving local relevance while maintaining volume.
+
+## Step 18: Version Control Checkpoint
+- **Date**: 2026-01-29
+- **Action**: Committed all changes (Node server, sorting logic, tests).
+- **Commit Message**: `feat: add node proxy server and smart job sorting`
+- **Action**: Pushed `main` branch to remote GitHub repository.
+- **Status**: Local and Remote are in sync.
+
+## Step 19: Documentation
+- **Date**: 2026-01-29
+- **Action**: Created `README.md`.
+- **Content**: Detailed setup instructions, specifically focusing on the creation of the `config.js` file (which is gitignored) so other developers know how to run the project.
+- **Goal**: Ensure the project is reproducible and the API key requirement is transparent.
+
+## Step 20: Documentation Sync
+- **Date**: 2026-01-29
+- **Action**: Committed `README.md` and updated process logs.
+- **Action**: Pushed documentation updates to GitHub.
+- **Status**: Visual Studio Code / Project is fully documented and synced.
