@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevDash | AI & Job Tracker</title>
+    
+    <!-- Fonts: Outfit for headings, Inter for body -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Background glow moved to CSS pseudo-element -->
+    
+    <main class="dashboard-container">
+        <header class="app-header">
+            <hgroup class="logo">
+                <span class="logo-icon" aria-hidden="true">🚀</span>
+                <h1>DevDash</h1>
+            </hgroup>
+            <section class="user-greeting">
+                <time id="current-time">--:--</time>
+                <p>Ready to level up?</p>
+            </section>
+        </header>
+
+        <!-- AI News Section -->
+        <article class="card news-card">
+            <header>
+                <h2>Latest in AI</h2>
+                <span class="badge">Live</span>
+            </header>
+            <ul id="news-feed" class="scroll-content">
+                <!-- News items will be injected as <li> tags -->
+                <li class="loading-state">
+                    <div class="spinner"></div>
+                    <p>Scanning the neural net...</p>
+                </li>
+            </ul>
+        </article>
+
+        <!-- Jobs Section -->
+        <article class="card jobs-card">
+            <header>
+                <h2>Junior Dev Jobs</h2>
+                <span class="badge">New Grad</span>
+            </header>
+            <ul id="jobs-feed" class="scroll-content">
+                <!-- Job items will be injected as <li> tags -->
+                <li class="loading-state">
+                    <div class="spinner"></div>
+                    <p>Fetching opportunities...</p>
+                </li>
+            </ul>
+        </article>
+    </main>
+
+    <script src="app.js" type="module"></script>
+</body>
+</html>
