@@ -1,16 +1,62 @@
-// Main Application Logic
+async function init() {
+    initClock();
 
-// Initialize the dashboard ONLY if not running in a test environment
-if (typeof window !== 'undefined' && !window.IS_TEST_MODE) {
-    document.addEventListener('DOMContentLoaded', () => {
-        initClock();
-        fetchNews();
-        fetchJobs();
-    });
+    const newsContainer = document.getElementById('news-feed');
+    const jobsContainer = document.getElementById('jobs-feed');
+
+    // Global cache for saved jobs
+    window.savedJobsCache = [];
+    window.currentNewsPage = 0; // Track news pagination
+
+    // Fetch all data in parallel
+    const [news, jobs, saved] = await Promise.all([
+        fetchNews(0, 10), // Fetch 10 news items initially
+        fetchJobs(),
+        fetchSavedJobs()
+    ]);
+    
+    window.savedJobsCache = saved;
+
+    renderItems(newsContainer, news, 'news');
+    setupLoadMoreNews(newsContainer);
+    // Initial render is handled by fetchJobs inside itself in previous version, 
+    // but here we are explicit. fetchJobs returns data now.
+
+    // Filter Logic
+    const btnLatest = document.getElementById('btn-latest');
+    const btnSaved = document.getElementById('btn-saved');
+
+    if (btnLatest && btnSaved) {
+        btnLatest.addEventListener('click', () => {
+            btnLatest.classList.add('active');
+            btnLatest.setAttribute('aria-pressed', 'true');
+            btnSaved.classList.remove('active');
+            btnSaved.setAttribute('aria-pressed', 'false');
+            
+            // Reset Header
+            const header = document.getElementById('job-section-header');
+            if(header) header.textContent = 'Junior Dev Jobs';
+            
+            // Re-render latest jobs
+            renderItems(jobsContainer, jobs, 'job');
+        });
+
+        btnSaved.addEventListener('click', async () => {
+            btnSaved.classList.add('active');
+            btnSaved.setAttribute('aria-pressed', 'true');
+            btnLatest.classList.remove('active');
+            btnLatest.setAttribute('aria-pressed', 'false');
+            
+            await renderSavedView();
+        });
+    }
 }
 
-// Export functions for testing
-export { initClock, fetchNews, fetchJobs, renderItems };
+// Main Application Logic
+// Initialize the dashboard ONLY if not running in a test environment
+if (typeof window !== 'undefined' && !window.IS_TEST_MODE) {
+    document.addEventListener('DOMContentLoaded', init);
+}
 
 // 1. Clock Functionality
 function initClock() {
@@ -29,9 +75,10 @@ function initClock() {
 }
 
 // 2. Fetch AI News (Real Data via HackerNews/Algolia)
-async function fetchNews() {
+async function fetchNews(page = 0, limit = 10) {
     const container = document.getElementById('news-feed');
-    const API_URL = 'https://hn.algolia.com/api/v1/search_by_date?query=AI&tags=story&hitsPerPage=6';
+    // We search for "AI" stories
+    const API_URL = `https://hn.algolia.com/api/v1/search_by_date?query=AI&tags=story&hitsPerPage=${limit}&page=${page}`;
     
     try {
         const response = await fetch(API_URL);
@@ -45,10 +92,11 @@ async function fetchNews() {
             description: `Discussion by ${hit.author} • ${hit.points || 0} points`
         }));
 
-        renderItems(container, newsData, 'news');
+        return newsData; // Return data, don't render internally
     } catch (error) {
         console.error('Error fetching news:', error);
         container.innerHTML = '<li class="loading-state"><p>Failed to load news. Check console.</p></li>';
+        return [];
     }
 }
 
@@ -115,7 +163,7 @@ async function fetchJobs() {
         if (container) {
              container.innerHTML = `<li class="loading-state"><p>Unable to load jobs.<br><small>${error.message}</small></p></li>`;
         }
-        throw error;
+        return [];
     }
 }
 
@@ -129,6 +177,31 @@ function getRelativeTime(date) {
     return Math.floor(seconds) + "s ago";
 }
 
+// 4. Persistence Logic
+async function fetchSavedJobs() {
+    try {
+        const response = await fetch('/api/saved-jobs');
+        if (!response.ok) throw new Error('Failed to fetch saved jobs');
+        const data = await response.json();
+        return data || [];
+    } catch (e) {
+        console.error("Error loading saved jobs:", e);
+        return [];
+    }
+}
+
+async function saveJobsToServer(jobs) {
+    try {
+        await fetch('/api/saved-jobs', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(jobs)
+        });
+    } catch (e) {
+        console.error("Error saving jobs:", e);
+    }
+}
+
 // Helper: Strip HTML from RSS descriptions
 function stripHtml(html) {
     let tmp = document.createElement("DIV");
@@ -139,11 +212,20 @@ function stripHtml(html) {
 }
 
 // Helper: Render items to DOM
-function renderItems(container, items, type) {
-    container.innerHTML = ''; // Clear loading state
+function renderItems(container, items, type, append = false) {
+    if (!container) return;
     
-    // Load saved jobs from local storage
-    const savedJobs = new Set(JSON.parse(localStorage.getItem('savedJobs')) || []);
+    if (!append) {
+        container.innerHTML = ''; // Clear only if not appending
+    }
+    
+    if (!items || !Array.isArray(items)) {
+        console.warn('renderItems called with invalid items:', items);
+        return;
+    }
+    
+    // Load saved jobs from local cache
+    const savedJobs = window.savedJobsCache || [];
 
     items.forEach(item => {
         // Create <li> for semantic list
@@ -159,14 +241,14 @@ function renderItems(container, items, type) {
             // Job Specific Logic
             metaHtml = `<span>${item.company}</span><span>•</span><span>${item.location}</span>`;
             
-            // Check if saved
-            const isSaved = savedJobs.has(item.url);
+            // Check if saved (compare by URL)
+            const isSaved = savedJobs.some(job => job.url === item.url);
             const btnClass = isSaved ? 'save-btn saved' : 'save-btn';
             const btnLabel = isSaved ? 'Unsave Job' : 'Save Job';
             
             // Add Save Button
             actionHtml = `
-                <button class="${btnClass}" aria-label="${btnLabel}" data-url="${item.url}">
+                <button class="${btnClass}" aria-label="${btnLabel}">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
                     </svg>
@@ -194,24 +276,120 @@ function renderItems(container, items, type) {
             btn.addEventListener('click', (e) => {
                 e.preventDefault(); // Prevent link navigation
                 e.stopPropagation(); // Stop bubbling
-                toggleSave(item.url, btn);
+                toggleSave(item, btn);
             });
         }
     });
+
+    // Handle Empty State
+    if (items.length === 0 && !append) {
+        const emptyMsg = type === 'news' ? 'No news found.' : 'No jobs found.';
+        container.innerHTML = `<li class="empty-state">${emptyMsg}</li>`;
+    }
 }
 
-function toggleSave(url, btn) {
-    const savedJobs = new Set(JSON.parse(localStorage.getItem('savedJobs')) || []);
+function toggleSave(item, btn) {
+    let savedJobs = window.savedJobsCache || [];
     
-    if (savedJobs.has(url)) {
-        savedJobs.delete(url);
+    // Check if job is already saved
+    const index = savedJobs.findIndex(job => job.url === item.url);
+    
+    if (index !== -1) {
+        // Remove functionality
+        savedJobs.splice(index, 1);
         btn.classList.remove('saved');
         btn.setAttribute('aria-label', 'Save Job');
     } else {
-        savedJobs.add(url);
+        // Add functionality
+        // Ensure we only save relevant fields to save space
+        const jobToSave = {
+            url: item.url,
+            title: item.title,
+            company: item.company,
+            location: item.location,
+            description: item.description,
+            date: new Date().toISOString() // Track when it was saved
+        };
+        savedJobs.push(jobToSave);
         btn.classList.add('saved');
         btn.setAttribute('aria-label', 'Unsave Job');
     }
     
-    localStorage.setItem('savedJobs', JSON.stringify([...savedJobs]));
+    // Update Global Cache & Server
+    window.savedJobsCache = savedJobs;
+    saveJobsToServer(savedJobs);
+}
+
+// Function to render saved view
+async function renderSavedView() {
+    const jobList = document.getElementById('jobs-feed');
+    // Ensure we have latest data
+    window.savedJobsCache = await fetchSavedJobs();
+    const savedJobs = window.savedJobsCache;
+    
+    // Update Header Text to context
+    const header = document.getElementById('job-section-header');
+    if(header) header.textContent = 'Saved Jobs';
+
+    renderItems(jobList, savedJobs, 'job');
+}
+
+function setupLoadMoreNews(container) {
+    // Create wrapper for button
+    const wrapper = document.createElement('div');
+    wrapper.className = 'load-more-wrapper';
+
+    const btn = document.createElement('button');
+    btn.className = 'btn-load-more';
+    btn.textContent = 'Load More News';
+    
+    wrapper.appendChild(btn);
+    // Insert after the UL container (which is 'container')
+    // The container is the UL. We want to append the button AFTER the UL.
+    container.parentNode.appendChild(wrapper);
+
+    btn.addEventListener('click', async () => {
+        const originalText = btn.textContent;
+        btn.textContent = 'Loading...';
+        btn.disabled = true;
+        
+        try {
+            // Logic for next page
+            // We started with page 0 (limit 10).
+            // This consumed "logical pages" 0 and 1 (if we think in 5s)
+            // Or just: page 0 (size 10).
+            // Next request: we want 5 items.
+            // If we switch to hitsPerPage=5.
+            // Page 0 = 0-4. Page 1 = 5-9. Page 2 = 10-14.
+            // Since we have items 0-9. We need page 2.
+            
+            let nextPage = 2; // Default start after 10 items
+            if (window.currentNewsPage) {
+                 nextPage = window.currentNewsPage + 1;
+            } else {
+                 // First load more click
+                 window.currentNewsPage = 2;
+                 nextPage = 2;
+            }
+
+            const newItems = await fetchNews(nextPage, 5);
+            
+            if (newItems.length > 0) {
+                renderItems(container, newItems, 'news', true);
+                window.currentNewsPage = nextPage;
+                btn.textContent = 'Load More News';
+                btn.disabled = false;
+            } else {
+                btn.textContent = 'No more news';
+                // keep disabled
+            }
+        } catch (e) {
+            console.error(e);
+            btn.textContent = 'Error loading';
+            btn.disabled = false;
+            setTimeout(() => {
+                btn.textContent = originalText;
+            }, 2000);
+        }
+    });
 }

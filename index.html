@@ -55,8 +55,16 @@
         <!-- Jobs Section -->
         <article class="card jobs-card">
             <header>
-                <h2>Junior Dev Jobs</h2>
-                <span class="badge">New Grad</span>
+                <div class="header-content">
+                    <h2 id="job-section-header">Junior Dev Jobs</h2>
+                    <span class="badge">New Grad</span>
+                </div>
+                <div class="filter-controls">
+                    <div class="toggle-switch">
+                        <button class="toggle-option active" id="btn-latest" aria-pressed="true">Latest</button>
+                        <button class="toggle-option" id="btn-saved" aria-pressed="false">Saved</button>
+                    </div>
+                </div>
             </header>
             <ul id="jobs-feed" class="scroll-content">
                 <!-- Skeleton Loader -->

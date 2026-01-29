@@ -170,3 +170,9 @@ This document records the step-by-step process of creating and setting up this p
 - **Action**: Added Bookmark/Save icon to Job Cards in `app.js`.
 - **Action**: Added CSS for the save button including hover states and active "filled" state.
 - **Verification**: Verified that clicking the button toggles the state and that the state persists after page reload.
+
+## Step 25: Saved Jobs View (Start)
+- **Date**: 2026-01-29
+- **Goal**: Create a dedicated view for saved jobs.
+- **Refactor**: Will update `localStorage` schema to store full job objects instead of just URLs, enabling offline/instant rendering of saved items.
+- **UI**: Add "Saved" tab to the main navigation.

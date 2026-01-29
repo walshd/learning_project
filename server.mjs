@@ -65,6 +65,52 @@ const server = http.createServer(async (req, res) => {
         }
         return;
     }
+    
+    // 2. Saved Jobs Endpoint (Persistence)
+    if (req.url === '/api/saved-jobs') {
+        const DB_FILE = path.join(__dirname, 'saved_jobs.json');
+
+        if (req.method === 'GET') {
+            fs.readFile(DB_FILE, (err, data) => {
+                if (err) {
+                    if (err.code === 'ENOENT') {
+                        // File doesn't exist yet, return empty array
+                        res.writeHead(200, { 'Content-Type': 'application/json' });
+                        res.end('[]');
+                    } else {
+                        res.writeHead(500);
+                        res.end(JSON.stringify({ error: 'Database error' }));
+                    }
+                } else {
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    res.end(data);
+                }
+            });
+            return;
+        }
+
+        if (req.method === 'POST') {
+            let body = '';
+            req.on('data', chunk => body += chunk);
+            req.on('end', () => {
+                try {
+                    // Validate JSON
+                    const jobs = JSON.parse(body);
+                    if (!Array.isArray(jobs)) throw new Error('Data must be an array');
+
+                    fs.writeFile(DB_FILE, JSON.stringify(jobs, null, 2), (err) => {
+                        if (err) throw err;
+                        res.writeHead(200, { 'Content-Type': 'application/json' });
+                        res.end(JSON.stringify({ success: true }));
+                    });
+                } catch (e) {
+                    res.writeHead(400);
+                    res.end(JSON.stringify({ error: 'Invalid Data' }));
+                }
+            });
+            return;
+        }
+    }
 
     // 2. Static File Server
     let filePath = path.join(__dirname, req.url === '/' ? 'index.html' : req.url);
