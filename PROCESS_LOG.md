@@ -176,3 +176,27 @@ This document records the step-by-step process of creating and setting up this p
 - **Goal**: Create a dedicated view for saved jobs.
 - **Refactor**: Will update `localStorage` schema to store full job objects instead of just URLs, enabling offline/instant rendering of saved items.
 - **UI**: Add "Saved" tab to the main navigation.
+
+## Step 26: Persistence & Bug Fixes
+- **Date**: 2026-01-29
+- **Actions**:
+  1. **Persistence**: Moved from `localStorage` to **Server-Side JSON Persistence**.
+     - Created `saved_jobs.json`.
+     - Added `/api/saved-jobs` endpoint to `server.mjs` (GET/POST).
+     - Updated `app.js` to sync with the server.
+  2. **Bug Fix (News Feed)**: Fixed a race condition where the news list would load and then immediately clear itself due to a logic error in `fetchNews` and `renderItems`.
+  3. **Bug Fix (Stability)**: Improved error handling in `fetchJobs` and `fetchNews` to prevent app crashing on partial failures.
+
+## Step 27: News Feed Pagination
+- **Date**: 2026-01-29
+- **Request**: User wanted more news items and a way to load them incrementally.
+- **Action**: Increased initial News load from 6 to 10 items.
+- **Action**: Implemented **"Load More"** button for the News Feed.
+  - Fetches 5 additional items per click.
+  - Appends seamlessly to the existing list.
+- **Action**: Verified functionality via browser automation.
+
+## Step 28: Git Hygiene
+- **Action**: Added `saved_jobs.json` to `.gitignore` to ensure the local database is not committed to the repo.
+- **Action**: Committed all changes.
+- **Commit Message**: `feat: Add saved jobs persistence, fix news feed, and add pagination`.
