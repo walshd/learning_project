@@ -142,3 +142,18 @@ This document records the step-by-step process of creating and setting up this p
 - **Action**: Committed `README.md` and updated process logs.
 - **Action**: Pushed documentation updates to GitHub.
 - **Status**: Visual Studio Code / Project is fully documented and synced.
+
+## Phase 2: Polish & Functionality
+
+## Step 21: UI Polish Plan
+- **Date**: 2026-01-29
+- **Goal**: Implement "Premium" feel and User Personalization.
+- **Task 1 (Visuals)**: Replace text-based loading states with **Skeleton Screens** (Shimmer effects).
+- **Task 2 (Visuals)**: Enhance card interactions (hover lift, smooth transitions).
+- **Task 3 (Feature)**: Implement **"Save Job"** functionality using `localStorage`.
+
+## Step 22: Skeleton Screens Implementation
+- **Date**: 2026-01-29
+- **Action**: Modified `styles.css` to include specific Skeleton Loading animations (shimmer effect).
+- **Action**: Updated `index.html` to use the static skeleton markup instead of a simple spinner, ensuring immediate visual feedback.
+- **Verification**: Browser subagent captured the transition from Skeleton state to Loaded state. The app now feels faster and more polished.

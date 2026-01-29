@@ -206,28 +206,55 @@ ul.scroll-content {
     background: rgba(255, 255, 255, 0.2);
 }
 
-/* Loading State (li) */
-li.loading-state {
+/* Skeleton Loading State */
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+.skeleton-wrapper {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
     gap: 1rem;
-    color: var(--text-muted);
+    padding-top: 1rem;
 }
 
-.spinner {
-    width: 40px;
-    height: 40px;
-    border: 3px solid rgba(255, 255, 255, 0.1);
-    border-radius: 50%;
-    border-top-color: var(--accent-primary);
-    animation: spin 1s linear infinite;
+.skeleton-card {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: var(--radius-md);
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    border: 1px solid transparent;
 }
 
-@keyframes spin {
-    to { transform: rotate(360deg); }
+.skeleton-text {
+    background: linear-gradient(90deg, 
+        rgba(255, 255, 255, 0.05) 25%, 
+        rgba(255, 255, 255, 0.1) 50%, 
+        rgba(255, 255, 255, 0.05) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite linear;
+    border-radius: 4px;
+    height: 1rem;
+    width: 100%;
+}
+
+.skeleton-title {
+    height: 1.4rem;
+    width: 70%;
+}
+
+.skeleton-meta {
+    height: 0.8rem;
+    width: 40%;
+}
+
+.skeleton-desc {
+    height: 3rem;
+    width: 100%;
 }
 
 /* Item Styling (li) */
