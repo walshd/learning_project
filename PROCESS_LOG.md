@@ -44,6 +44,82 @@ This document records the step-by-step process of creating and setting up this p
 - **Action**: Updated `app.js` to render list items (`<li>`) instead of generic divs.
 - **Outcome**: Codebase is now compliant with PDR constraints.
 
+## Step 8: Live Preview
+- **Date**: 2026-01-29
+- **Action**: Started local development server using `python3 -m http.server`.
+- **URL**: `http://localhost:8080`
+
+## Step 9: User Experience Improvements
+- **Date**: 2026-01-29
+- **Request**: Increase detail, restrict jobs to Manchester/Liverpool, make items clickable.
+- **Action**: Updated `app.js` with richer mock data including descriptions and URLs.
+- **Action**: Refined `renderItems` to wrap functionality in `<a>` tags for standard browser navigation.
+- **Action**: Styled the new `.item-description` and hover states in `styles.css`.
+
+## Step 10: Real Data Integration
+- **Date**: 2026-01-29
+- **Action**: Replaced mock News data with **HackerNews Algolia API**.
+- **Action**: Replaced mock Jobs data with **Reed.co.uk RSS Feed** (proxied via `rss2json` to bypass CORS).
+  - *Note*: This allows us to fetch real Manchester/Liverpool jobs without a backend server.
+- **Action**: Implemented helpers for timestamp formatting and HTML stripping.
+
+## Step 11: Debugging & Testing
+- **Issue**: `rss2json` service returned HTTP 500 error (unreliable).
+- **Test Creation**: Created `tests.html` using Mocha/Chai to verify API fixes autonomously.
+- **Fix**: Switched from `rss2json` (JSON) to `allorigins.win` + `DOMParser` (XML).
+  - *Update*: Reed RSS proved unstable. Switched to **Jobicy API** (JSON) for robust UK job listings.
+- **Verification**: Ran `tests.html` in the browser.
+  - **Result**: All tests passed (News: ✅, Jobs: ✅).
+
+## Step 12: Deployment Readiness
+- **Status**: Core features are functional and tested.
+- **Next**: Ready to deploy or add "Polish" features.
+
+## Step 13: Final Stability Fix (CORS)
+- **Issue**: User reported recurring `API connection failed`. Debugging confirmed `Access-Control-Allow-Origin: null` from Jobicy when running locally.
+- **Action**: Wrapped the Jobicy API call with the `allorigins.win` proxy (similar to our RSS approach).
+- **Reason**: This guarantees the browser receives a valid CORS header, ensuring consistent data loading.
+- **Bonus**: Added a fallback to "Demo Data" so the UI never looks broken even if the proxy fails.
+
+## Step 14: Data Refinement (Location)
+- **Request**: User noted jobs were not specific to Manchester/Liverpool.
+- **Action**: Increased API fetch limit to 50 items to widen search pool.
+- **Action**: Implemented strict client-side filtering to only show jobs where `location` or `description` contains "Manchester" or "Liverpool".
+
+## Step 15: Secret Management & Reed API
+- **Date**: 2026-01-29
+- **Requirement**: Use official Reed API but protect the API Key.
+- **Action**: Created `config.js` to hold the key (`REED_API_KEY`).
+- **Security**: Added `config.js` to `.gitignore` to prevent secret leakage.
+- **Implementation**: Updated `app.js` to use Basic Auth.
+- **Constraint**: The Reed API likely blocks CORS. Since we have no backend, this will fail locally without a browser extension. Acknowledged this trade-off to the user.
 
 
 
+
+
+
+
+
+
+
+
+
+## Step 16: Backend for CORS & Security
+- **Date**: 2026-01-29
+- **Issue**: Client-side fetch to Reed API blocked by CORS from localhost.
+- **Action**: Created `server.mjs`, a lightweight Node.js server.
+  - Serves static files (replacing Python `http.server`).
+  - Provides a `/api/jobs` proxy endpoint.
+  - Securely reads `REED_API_KEY` from `config.js` on the server-side, keeping it out of the browser.
+- **Action**: Updated `app.js` to fetch from `/api/jobs` instead of directly hitting the Reed API.
+- **Outcome**: This solves the CORS issue permanently and follows security best practices (secrets stay on the server).
+
+## Step 17: Job Sorting Logic
+- **Date**: 2026-01-29
+- **Request**: User wanted Manchester/Liverpool jobs prioritised at the top, but still wanted to see others.
+- **Action**: Broadened the Reed API query in `server.mjs` to fetch 50 jobs nationwide (removed `location` parameter).
+- **Action**: Implemented client-side sorting in `app.js`:
+  - **Priority**: Jobs with "Manchester" or "Liverpool" in the location are bumped to the top of the list.
+  - **Secondary**: All other locations follow.
+- **Outcome**: The dashboard now intelligently organizes data, giving local relevance while maintaining volume.

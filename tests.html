@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>DevDash Tests</title>
+    <!-- Mocha CSS -->
+    <link href="https://unpkg.com/mocha/mocha.css" rel="stylesheet" />
+</head>
+<body>
+    <div id="mocha"></div>
+    
+    <!-- Hidden containers for code to manipulate -->
+    <div style="display:none;">
+        <ul id="news-feed"></ul>
+        <ul id="jobs-feed"></ul>
+        <span id="current-time"></span>
+    </div>
+
+    <!-- Mocha Setup -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mocha/10.2.0/mocha.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chai/4.3.7/chai.min.js"></script>
+    <script>
+        mocha.setup('bdd');
+        window.IS_TEST_MODE = true; // Flag to prevent auto-run in app.js
+    </script>
+
+    <!-- Import App & Define Tests -->
+    <script type="module">
+        import { fetchNews, fetchJobs } from './app.js';
+        const expect = chai.expect;
+
+        describe('DevDash Functionality', function() {
+            this.timeout(10000); // Allow time for API calls
+
+            it('should fetch news from HackerNews', async function() {
+                // We rely on the text being injected into the DOM
+                await fetchNews();
+                const container = document.getElementById('news-feed');
+                const items = container.querySelectorAll('li');
+                
+                expect(items.length).to.be.greaterThan(0);
+                if (items.length > 0) {
+                     expect(items[0].querySelector('.item-title').textContent).to.not.be.empty;
+                }
+            });
+
+            it('should fetch jobs from Reed', async function() {
+                const jobs = await fetchJobs(); // Now returns data promise
+                const container = document.getElementById('jobs-feed');
+                const items = container.querySelectorAll('li');
+
+                expect(items.length).to.be.greaterThan(0);
+                expect(jobs).to.be.an('array');
+                expect(jobs[0]).to.have.property('title');
+                expect(jobs[0]).to.have.property('url');
+            });
+        });
+
+        mocha.run();
+    </script>
+</body>
+</html>
