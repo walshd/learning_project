@@ -16,7 +16,7 @@
     "id": 2,
     "feature": "Verify Ralph Loop",
     "description": "Ensure the loop script and prompt correctly interact with the tasks file.",
-    "status": "pending",
+    "status": "completed",
     "priority": "medium",
     "acceptance_criteria": [
       "Running `./.ralph/loop.sh` does not crash immediately.",
