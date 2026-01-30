@@ -17,12 +17,16 @@ async function init() {
     
     window.savedJobsCache = saved;
 
+    // Confirm data exists
     renderItems(newsContainer, news, 'news');
-    setupLoadMoreNews(newsContainer);
-    // Initial render is handled by fetchJobs inside itself in previous version, 
-    // but here we are explicit. fetchJobs returns data now.
+    // Initial render jobs
+    // Note: jobs are already rendered inside fetchJobs? 
+    // Wait, fetchJobs returns data but also calls renderItems inside itself (line 159). 
+    // We can just rely on that OR explicit render.
+    // However, to be safe and use our new data structure:
+    renderSkillPulse(jobs);
 
-    // Filter Logic
+    setupLoadMoreNews(newsContainer);
     const btnLatest = document.getElementById('btn-latest');
     const btnSaved = document.getElementById('btn-saved');
 
@@ -392,4 +396,50 @@ function setupLoadMoreNews(container) {
             }, 2000);
         }
     });
+}
+
+function renderSkillPulse(jobs) {
+    const container = document.getElementById('skill-pulse-container');
+    if (!container) return;
+
+    // Define keywords to look for (could be expanded)
+    const keywords = [
+        'React', 'Node', 'Python', 'TypeScript', 'JavaScript', 
+        'Java', 'AWS', 'Docker', 'SQL', 'PHP', 'C#', 'Vue', 'Angular', 'Go', 'Rust'
+    ];
+    
+    // Count frequencies
+    const counts = {};
+    keywords.forEach(k => counts[k] = 0);
+    
+    // Normalize text for closer matching
+    const allText = jobs.map(j => (j.title + ' ' + j.description).toLowerCase()).join(' ');
+    
+    keywords.forEach(word => {
+        // Simple regex to match whole words, case-insensitive
+        const regex = new RegExp(`\\b${word.toLowerCase()}\\b`, 'g');
+        const matches = allText.match(regex);
+        if (matches) {
+            counts[word] = matches.length;
+        }
+    });
+    
+    // Sort and get Top 5
+    const topSkills = Object.entries(counts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 6)
+        .filter(item => item[1] > 0); // Only positive counts
+
+    // Render
+    if (topSkills.length === 0) {
+        container.innerHTML = '<span class="loading-pulse">No skills trending yet.</span>';
+        return;
+    }
+
+    container.innerHTML = topSkills.map(([skill, count]) => `
+        <div class="skill-tag">
+            ${skill}
+            <span class="skill-count">${count}</span>
+        </div>
+    `).join('');
 }

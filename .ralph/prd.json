@@ -28,7 +28,7 @@
     "id": 3,
     "feature": "Implement 'Skill Pulse' Widget",
     "description": "Analyze fetched job descriptions to extract and count top tech keywords (e.g. React, Node, Python). Display these insights in a new dashboard widget.",
-    "status": "pending",
+    "status": "completed",
     "priority": "high",
     "acceptance_criteria": [
       "New 'Trending Skills' or 'Market Pulse' section added to index.html.",
