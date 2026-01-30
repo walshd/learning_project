@@ -210,3 +210,11 @@ This document records the step-by-step process of creating and setting up this p
   - ✅ MVP Features met (Clock, News Feed, Job Tracker).
   - ✅ Architecture met (Real APIs used, Persistence implemented).
 - **Status**: **Project Complete**. The application is stable, documented, and fully functional.
+
+## Step 30: Semantic Refactor (Skeleton Loader)
+- **Date**: 2026-01-30
+- **Action**: Refactored `index.html` skeleton loader markup.
+- **Change**: Replaced invalid `div` structures within `ul` with proper `li > article > h3/p` hierarchy.
+- **Reason**: To strictly adhere to the Project Definition Record's "Semantic HTML" constraint and ensure validity.
+- **Action**: Updated `styles.css` to target the new semantic selectors.
+- **Status**: Committed refactor.
