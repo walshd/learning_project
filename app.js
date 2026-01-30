@@ -141,8 +141,12 @@ async function fetchJobs() {
             company: item.employerName,
             location: item.locationName,
             url: item.jobUrl,
-            fullDescription: stripHtml(item.jobDescription), // Keep full text for analysis
-            description: stripHtml(item.jobDescription).substring(0, 100) + "..."
+            title: item.jobTitle,
+            company: item.employerName,
+            location: item.locationName,
+            url: item.jobUrl,
+            fullDescription: stripHtml(item.jobDescription), // No limit, keep full text
+            description: stripHtml(item.jobDescription, 100) // Limit for UI card
         }));
 
         // Sort: Manchester/Liverpool first, then others
@@ -208,12 +212,15 @@ async function saveJobsToServer(jobs) {
 }
 
 // Helper: Strip HTML from RSS descriptions
-function stripHtml(html) {
+function stripHtml(html, limit = null) {
     let tmp = document.createElement("DIV");
     tmp.innerHTML = html;
     let text = tmp.textContent || tmp.innerText || "";
-    // Limit length
-    return text.length > 100 ? text.substring(0, 100) + '...' : text;
+    
+    if (limit && text.length > limit) {
+        return text.substring(0, limit) + '...';
+    }
+    return text;
 }
 
 // Helper: Render items to DOM

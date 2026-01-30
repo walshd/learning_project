@@ -53,11 +53,38 @@ const server = http.createServer(async (req, res) => {
 
             if (!apiRes.ok) throw new Error(`Upstream API Error: ${apiRes.status}`);
 
-            const data = await apiRes.json();
+            const initialData = await apiRes.json();
             
+            // skill-pulse-enhancement: Fetch full details for top 15 jobs
+            // We do this server-side to avoid 15 separate client requests (waterfall).
+            // Only do this if results exist.
+            if (initialData.results && initialData.results.length > 0) {
+                const topJobs = initialData.results.slice(0, 15); // Take top 15 for analysis
+                
+                // Create prompt array of promises
+                const detailPromises = topJobs.map(job => 
+                    fetch(`https://www.reed.co.uk/api/1.0/jobs/${job.jobId}`, {
+                        headers: { 'Authorization': 'Basic ' + Buffer.from(REED_API_KEY + ':').toString('base64') }
+                    })
+                    .then(res => res.ok ? res.json() : null)
+                    .catch(err => null)
+                );
+
+                const details = await Promise.all(detailPromises);
+
+                // Merge details back into results
+                // We map over the original topJobs index because Promise.all maintains order
+                details.forEach((detail, index) => {
+                    if (detail && detail.jobDescription) {
+                        // Override the truncated description with the full HTML one
+                        initialData.results[index].jobDescription = detail.jobDescription;
+                    }
+                });
+            }
+
             // Forward headers and data
             res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify(data));
+            res.end(JSON.stringify(initialData));
         } catch (err) {
             console.error('Proxy Error:', err);
             res.writeHead(502, { 'Content-Type': 'application/json' });

@@ -257,3 +257,11 @@ This document records the step-by-step process of creating and setting up this p
 - **Diagnosis**: We were analyzing the *truncated* 100-character description used for the UI card, rather than the full job description.
 - **Fix**: Updated `app.js` to store `fullDescription` in the job object and point the analysis engine to that field.
 - **Outcome**: Analysis now runs on the complete text content of all fetched jobs.
+
+## Step 35: Skill Pulse Deep Fix
+- **Date**: 2026-01-30
+- **Issue**: Despite previous fixes, `stripHtml` was still truncating full descriptions to 100 chars internally.
+- **Fix**: Modified `stripHtml` to accept an optional `limit` parameter.
+- **Detail**: `fullDescription` now calls `stripHtml` with no limit, while UI cards use a 100-char limit.
+- **Verification**: Browser subagent verified full strings.
+- **Outcome**: Data flow for Skill Pulse is now fully unlocked.
