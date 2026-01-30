@@ -1,0 +1,40 @@
+[
+  {
+    "id": 1,
+    "feature": "Implement Ralph Loop",
+    "description": "Set up the directory structure and files for the Ralph autonomous coding loop.",
+    "status": "completed",
+    "priority": "high",
+    "acceptance_criteria": [
+      "Directory `.ralph/` exists.",
+      "File `.ralph/prd.json` exists and is valid JSON.",
+      "File `.ralph/prompt.md` exists and contains context instructions.",
+      "File `.ralph/loop.sh` exists and is executable."
+    ]
+  },
+  {
+    "id": 2,
+    "feature": "Verify Ralph Loop",
+    "description": "Ensure the loop script and prompt correctly interact with the tasks file.",
+    "status": "pending",
+    "priority": "medium",
+    "acceptance_criteria": [
+      "Running `./.ralph/loop.sh` does not crash immediately.",
+      "The script can read the PROMPT_FILE.",
+      "The agent correctly identifies the first pending task."
+    ]
+  },
+  {
+    "id": 3,
+    "feature": "Implement 'Skill Pulse' Widget",
+    "description": "Analyze fetched job descriptions to extract and count top tech keywords (e.g. React, Node, Python). Display these insights in a new dashboard widget.",
+    "status": "pending",
+    "priority": "high",
+    "acceptance_criteria": [
+      "New 'Trending Skills' or 'Market Pulse' section added to index.html.",
+      "JavaScript logic parses job descriptions to count keyword frequency.",
+      "UI displays top 5 trending skills with their occurrence counts.",
+      "Styling matches the existing dark/glassmorphism theme."
+    ]
+  }
+]
