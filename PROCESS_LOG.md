@@ -250,3 +250,10 @@ This document records the step-by-step process of creating and setting up this p
 - **Verification**: Verified via browser simulation (injecting mock data when API was unstable). Widget correctly ranks and displays skills.
 - **Status**: Task completed and integrated.
 - **Note**: The real data heavily depends on the Reed API availability, but the frontend logic is solid.
+
+## Step 34: Skill Pulse Fix
+- **Date**: 2026-01-30
+- **Issue**: Skill Pulse widget was only finding limited keywords (e.g., "Python: 1").
+- **Diagnosis**: We were analyzing the *truncated* 100-character description used for the UI card, rather than the full job description.
+- **Fix**: Updated `app.js` to store `fullDescription` in the job object and point the analysis engine to that field.
+- **Outcome**: Analysis now runs on the complete text content of all fetched jobs.

@@ -141,6 +141,7 @@ async function fetchJobs() {
             company: item.employerName,
             location: item.locationName,
             url: item.jobUrl,
+            fullDescription: stripHtml(item.jobDescription), // Keep full text for analysis
             description: stripHtml(item.jobDescription).substring(0, 100) + "..."
         }));
 
@@ -413,7 +414,7 @@ function renderSkillPulse(jobs) {
     keywords.forEach(k => counts[k] = 0);
     
     // Normalize text for closer matching
-    const allText = jobs.map(j => (j.title + ' ' + j.description).toLowerCase()).join(' ');
+    const allText = jobs.map(j => (j.title + ' ' + (j.fullDescription || j.description)).toLowerCase()).join(' ');
     
     keywords.forEach(word => {
         // Simple regex to match whole words, case-insensitive
